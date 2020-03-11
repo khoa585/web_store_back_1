@@ -1,8 +1,8 @@
 var user = require('./../Models/user');
-let checkLogin = async (username, password) => {
+let checkLogin = async (data) => {
     let User = await user.find({
-        username: username,
-        password: password
+        username: data.username,
+        password: data.password,
     })
     return User;
 }
