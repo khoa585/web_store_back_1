@@ -7,6 +7,10 @@ let ResponsiveHelper = require('./../commons/ResponsiveHelper');
 var ErrorEC = require('./../contants/error')
 let { getToken } = require('./../commons/JWThelpers');
 var user = require('./../Models/user');
+var Db_Product = require('../Models/Db_Product');
+let cartProduct = require('../Models/cart');
+
+var Cart = require('../Controllers/cart');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');
@@ -33,7 +37,7 @@ router.post('/login', async (req, res) => {
         }
         req.session.use = {
             type: result[0].username,
-            token : token
+            token: token
         }
         return ResponsiveHelper.json(req, res, null, result['info']);
     } else {
@@ -42,6 +46,7 @@ router.post('/login', async (req, res) => {
 })
 router.get('/me', async (req, res) => {
     let result = req.user;
+    console.log(result)
     return ResponsiveHelper.json(req, res, null, result);
 })
 router.post('/users', async (req, res) => {
@@ -81,6 +86,64 @@ router.post('/change_Password', async (req, res) => {
             return ResponsiveHelper.json(req, res, null, 'SUCCESS');
         }
     }
+})
+router.post('/add/:id', async (req, res) => {
+    let product_Id = req.params.id;
+    let result = req.user;
+    let Quantity = req.body.Quantity;
+    let product = await Db_Product.find({ _id: product_Id }, (err, data) => {
+        if (err) return err;
+        return data;
+    })
+    if (result) {
+        cartProduct.findOne({ 'cart.idProduct': product_Id }, (err, docs) => {
+            if (err) {
+                return ResponsiveHelper.json(req, res, err, null);
+            } else {
+                if (!docs) {
+                    var Product = new cartProduct({
+                        idUser: result._id,
+                        cart: [{
+                            idProduct: product[0]._id,
+                            nameProduct: product[0].name,
+                            quantity: 1,
+                            price: product[0].price,
+                            sale: product[0].sale
+                        }]
+                    })
+                    Product.save();
+                    return ResponsiveHelper.json(req, res, null, Product);
+                } else {
+                    if (Quantity) {
+                        docs.cart[0].quantity = parseInt(docs.cart[0].quantity) + Quantity;
+                        docs.cart[0].price = parseInt(docs.cart[0].price) * docs.cart[0].quantity;
+                    } else {
+                        docs.cart[0].quantity++;
+                        docs.cart[0].price = parseInt(docs.cart[0].price) * docs.cart[0].quantity;
+                    }
+                    docs.save();
+                    return ResponsiveHelper.json(req, res, null, docs);
+                }
+            }
+        })
+    }
+})
+router.post('/remove/:id', (req, res) => {
+    let product_Id = req.params.id;
+    cartProduct.findOneAndRemove({ 'cart.idProduct': product_Id }, (err, docs) => {
+        if (err) {
+            return ResponsiveHelper.json(req, res, err, null);
+        }
+        return ResponsiveHelper.json(req, res, null, 'SUCCESS');
+    })
+})
+router.post('/removeAll', (req, res) => {
+    cartProduct.deleteMany({}, (err, docs) => {
+        if (err) {
+            return ResponsiveHelper.json(req, res, err, null);
+        }
+        return ResponsiveHelper.json(req, res, null, 'SUCCESS');
+    })
 })
 
 module.exports = router;
