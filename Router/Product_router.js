@@ -9,8 +9,6 @@ let { getToken } = require('./../commons/JWThelpers');
 var user = require('./../Models/user');
 var Db_Product = require('../Models/Db_Product');
 let cartProduct = require('../Models/cart');
-
-var Cart = require('../Controllers/cart');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');
@@ -25,7 +23,7 @@ router.get("/", (req, res) => {
     res.render('Product_api');
 })
 router.get('/Product_api', controller.Products)
-router.post('/Product_api', upload.single('productImage'), controller.create_Pd)
+router.post('/Product_api', upload.array('productImage'), controller.create_Pd)
 router.delete('/Product_api/:id', controller.delete_Pd)
 router.post('/login', async (req, res) => {
     let result = await checkLogin(req.body);

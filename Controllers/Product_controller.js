@@ -10,7 +10,7 @@ module.exports.create_Pd = async function (req, res) {
 		description: req.body.description,
 		price: req.body.price,
 		sale: req.body.sale,
-		star: req.body.start,
+		star: req.body.star,
 		productImage: req.file.path
 	})
 	Products.save()
