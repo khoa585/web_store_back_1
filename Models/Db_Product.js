@@ -4,8 +4,8 @@ var Db_pdSchema = new mongoose.Schema({
 	description: String,
 	price: String,
 	sale: Boolean,
-	start: String,
-	productImage: String
+	star: String,
+	productImage: Array,
 });
 var Db_Product = mongoose.model('products', Db_pdSchema, 'products');
 module.exports = Db_Product;

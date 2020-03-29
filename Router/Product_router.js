@@ -1,14 +1,14 @@
 let express = require('express')
 let router = express.Router()
 let multer = require('multer');
-var user = require('./../Models/user');
-var { checkLogin } = require('./../Controllers/user');
+let user = require('./../Models/user');
+let { checkLogin } = require('./../Controllers/user');
 let ResponsiveHelper = require('./../commons/ResponsiveHelper');
-var ErrorEC = require('./../contants/error')
+let ErrorEC = require('./../contants/error')
 let { getToken } = require('./../commons/JWThelpers');
-var user = require('./../Models/user');
-var Db_Product = require('../Models/Db_Product');
+let Db_Product = require('../Models/Db_Product');
 let cartProduct = require('../Models/cart');
+let Product = require('./../Models/Db_Product');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');
@@ -18,12 +18,22 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage: storage })
-var controller = require('../Controllers/Product_controller')
+let controller = require('../Controllers/Product_controller')
 router.get("/", (req, res) => {
     res.render('Product_api');
 })
 router.get('/Product_api', controller.Products)
 router.post('/Product_api', upload.array('productImage'), controller.create_Pd)
+
+router.post('/removeAll_Product', (req, res) => {
+    Product.deleteMany({}, (err, docs) => {
+        if (err) {
+            return ResponsiveHelper.json(req, res, err, null);
+        }
+        return ResponsiveHelper.json(req, res, null, 'SUCCESS');
+    })
+})
+
 router.delete('/Product_api/:id', controller.delete_Pd)
 router.post('/login', async (req, res) => {
     let result = await checkLogin(req.body);
@@ -99,7 +109,7 @@ router.post('/add/:id', async (req, res) => {
                 return ResponsiveHelper.json(req, res, err, null);
             } else {
                 if (!docs) {
-                    var Product = new cartProduct({
+                    let Product = new cartProduct({
                         idUser: result._id,
                         cart: [{
                             idProduct: product[0]._id,
