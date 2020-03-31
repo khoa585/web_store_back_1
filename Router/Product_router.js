@@ -33,7 +33,6 @@ router.post('/removeAll_Product', (req, res) => {
         return ResponsiveHelper.json(req, res, null, 'SUCCESS');
     })
 })
-
 router.delete('/Product_api/:id', controller.delete_Pd)
 router.post('/login', async (req, res) => {
     let result = await checkLogin(req.body);
